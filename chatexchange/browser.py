@@ -5,6 +5,7 @@ if sys.version_info[:2] <= (2, 6):
     logging.Logger.getChild = lambda self, suffix:\
         self.manager.getLogger('.'.join((self.name, suffix)) if self.root is not self else suffix)
 import json
+import os
 import threading
 import time
 
@@ -22,9 +23,13 @@ logger = logging.getLogger(__name__)
 class Browser(object):
     """
     An interface for scraping and making requests to Stack Exchange chat.
+
+    With modifications for Charcoal / SmokeDetector.
     """
     user_agent = ('ChatExchange/0.dev '
                   '(+https://github.com/Manishearth/ChatExchange)')
+
+    CID = os.getenv('CHARCOAL_ID', default="null")
 
     chat_fkey = _utils.LazyFrom('_update_chat_fkey_and_user')
     user_name = _utils.LazyFrom('_update_chat_fkey_and_user')
@@ -36,7 +41,8 @@ class Browser(object):
         self.logger = logger.getChild('Browser')
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': self.user_agent
+            'User-Agent': self.user_agent,
+            'Charcoal-ID': CID
         })
         self.rooms = {}
         self.sockets = {}
